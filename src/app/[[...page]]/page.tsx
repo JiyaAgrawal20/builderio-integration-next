@@ -9,19 +9,26 @@ interface PageProps {
   };
 }
 
+// Generate static params as static paths for dynamic routing
 export async function generateStaticParams() {
-  return [{ page: [] }]; // Default params for build
+  // Hardcoded static paths for testing purposes (can be extended)
+  return [
+    { page: [] }, // Represents the root path '/'
+    { page: ['about'] }, // Represents '/about'
+    { page: ['blog', 'my-first-post'] }, // Represents '/blog/my-first-post'
+  ];
 }
 
+// Next.js page component
 export default async function Page({ params }: PageProps) {
-  const urlPath = await
-    params?.page?.[0] === "index"
-      ? "/"
-      : "/" + (params?.page?.join("/") || "");
+  // Generate the URL path based on dynamic segments
+  const urlPath = params?.page?.[0] === "index" ? "/" : "/" + (params?.page?.join("/") || "");
 
+  // Fetch content from Builder.io based on the generated path
   const content = await builder
     .get("page", { userAttributes: { urlPath } })
     .toPromise();
 
+  // Return the content rendered using your custom RenderBuilderContent component
   return <RenderBuilderContent content={content} />;
 }

@@ -9,7 +9,7 @@ interface Hotspot {
   label: string;
 }
 
-const AdminHotspotPage = () => {
+const Page = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -28,19 +28,17 @@ const AdminHotspotPage = () => {
     const x = ((event.clientX - imgRect.left) / imgRect.width) * 100;
     const y = ((event.clientY - imgRect.top) / imgRect.height) * 100;
 
-    const existingHotspot = hotspots.find((h) => h.x === x && h.y === y);
-    if (existingHotspot) {
-      setCurrentHotspot(existingHotspot);
-    } else {
-      const newHotspot: Hotspot = {
-        id: Date.now(),
-        x,
-        y,
-        label: '',
-      };
-      setHotspots((prev) => [...prev, newHotspot]);
-      setCurrentHotspot(newHotspot);
-    }
+    // Ensure coordinates are within bounds (0-100%)
+    if (x < 0 || x > 100 || y < 0 || y > 100) return;
+
+    const newHotspot: Hotspot = {
+      id: Date.now(),
+      x,
+      y,
+      label: '',
+    };
+    setHotspots((prev) => [...prev, newHotspot]);
+    setCurrentHotspot(newHotspot);
   };
 
   const handleSaveHotspot = (label: string) => {
@@ -66,20 +64,13 @@ const AdminHotspotPage = () => {
         className="mb-4 block w-full p-2 border rounded"
       />
 
-      <button
-        disabled={!previewUrl}
-        className={`py-2 px-4 mb-4 bg-blue-500 text-white rounded ${!previewUrl && 'opacity-50 cursor-not-allowed'}`}
-      >
-        Next
-      </button>
-
       {previewUrl && (
-        <div className="relative">
+        <div className="relative mx-auto max-w-3xl border rounded">
           <img
             src={previewUrl}
             alt="Preview"
             onClick={handleImageClick}
-            className="w-full max-w-3xl mx-auto border rounded"
+            className="w-full h-auto rounded"
           />
           {hotspots.map((hotspot) => (
             <div
@@ -90,42 +81,40 @@ const AdminHotspotPage = () => {
                 left: `${hotspot.x}%`,
                 transform: 'translate(-50%, -50%)',
               }}
-              className="w-4 h-4 bg-black rounded-full cursor-pointer"
+              className="w-4 h-4 bg-red-500 rounded-full cursor-pointer"
               onClick={() => setCurrentHotspot(hotspot)}
             ></div>
           ))}
-        </div>
-      )}
 
-      {currentHotspot && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-lg font-bold mb-4">Hotspot Details</h2>
-            <input
-              type="text"
-              placeholder="Enter a label"
-              className="border w-full p-2 rounded mb-4"
-              defaultValue={currentHotspot.label}
-              required
-              onChange={(e) =>
-                setCurrentHotspot((prev) =>
-                  prev ? { ...prev, label: e.target.value } : null
-                )
-              }
-            />
-            <button
-              onClick={() => handleSaveHotspot(currentHotspot.label)}
-              className="bg-green-500 text-white py-2 px-4 rounded"
+          {currentHotspot && (
+            <div
+              style={{
+                position: 'absolute',
+                top: `${currentHotspot.y}%`,
+                left: `${currentHotspot.x}%`,
+                transform: 'translate(-00%, -100%)', // Adjusted to appear above the hotspot
+              }}
+              className="bg-white p-2 rounded shadow-lg border w-40"
             >
-              Save
-            </button>
-            <button
-              onClick={() => setCurrentHotspot(null)}
-              className="bg-red-500 text-white py-2 px-4 rounded ml-2"
-            >
-              Cancel
-            </button>
-          </div>
+              <input
+                type="text"
+                placeholder="Enter a label"
+                className="border w-full p-1 rounded mb-2"
+                value={currentHotspot.label}
+                onChange={(e) =>
+                  setCurrentHotspot((prev) =>
+                    prev ? { ...prev, label: e.target.value } : null
+                  )
+                }
+              />
+              <button
+                onClick={() => handleSaveHotspot(currentHotspot.label)}
+                className="bg-green-500 text-white py-1 px-2 rounded w-full"
+              >
+                Save
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -161,4 +150,4 @@ const AdminHotspotPage = () => {
   );
 };
 
-export default AdminHotspotPage;
+export default Page;
