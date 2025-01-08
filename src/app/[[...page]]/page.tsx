@@ -22,7 +22,7 @@ export async function generateStaticParams() {
 // Next.js page component
 export default async function Page({ params }: PageProps) {
   // Generate the URL path based on dynamic segments
-  const urlPath = params?.page?.[0] === "index" ? "/" : "/" + (params?.page?.join("/") || "");
+  const urlPath = await params?.page?.[0] === "index" ? "/" : "/" + await (params?.page?.join("/") || "");
 
   // Fetch content from Builder.io based on the generated path
   const content = await builder
